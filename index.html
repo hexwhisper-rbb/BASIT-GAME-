@@ -1,37 +1,31 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BASIT GAME</title>
+<title>BASIT GAME - Endless Runner</title>
 
 <style>
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
     background: #171717;
     color: white;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: Arial, sans-serif;
     padding: 15px;
 }
 
-.game {
+.container {
+    max-width: 650px;
+    margin: 20px auto;
     background: #252525;
-    width: 100%;
-    max-width: 480px;
-    padding: 25px;
     border: 3px solid #e5a323;
     border-radius: 12px;
-    box-shadow: 0 0 20px #000;
+    padding: 15px;
 }
 
 .logo {
@@ -39,499 +33,531 @@ body {
     color: #ffbd36;
     font-size: 32px;
     font-weight: bold;
-    margin-bottom: 8px;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
+    margin: 10px;
 }
 
 .subtitle {
     text-align: center;
-    color: #bbb;
-    margin-bottom: 25px;
-}
-
-.screen {
-    display: none;
-}
-
-.screen.active {
-    display: block;
-}
-
-h2 {
-    text-align: center;
+    color: #aaa;
+    font-size: 12px;
     margin-bottom: 20px;
-    color: #ffbd36;
 }
 
-.description {
-    text-align: center;
-    color: #ddd;
-    line-height: 1.7;
-    margin-bottom: 25px;
+.scoreboard {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+    color: #ffbd36;
+    font-weight: bold;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    background: #a8d9ed;
+    border: 3px solid #444;
+    border-radius: 7px;
+    touch-action: manipulation;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 button {
-    width: 100%;
-    padding: 15px;
     border: none;
+    padding: 15px;
     border-radius: 7px;
     background: #e5a323;
     color: #171717;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 12px;
 }
 
-button:hover {
-    background: #ffc34f;
+.controls button {
+    flex: 1;
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+#jumpBtn {
+    background: #ffbd36;
 }
 
-.stats {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    color: #ffbd36;
-    font-weight: bold;
-}
-
-.timer-bar {
-    height: 10px;
-    background: #444;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#timerFill {
-    height: 100%;
+#startBtn {
     width: 100%;
-    background: #e5a323;
-    transition: width 1s linear;
+    margin-top: 15px;
 }
 
-#question {
-    font-size: 20px;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-
-.answers {
-    display: grid;
-    gap: 12px;
-}
-
-.answer {
-    background: #383838;
-    color: white;
-    border: 2px solid #555;
-    text-align: left;
-    margin: 0;
-}
-
-.answer:hover:not(:disabled) {
-    background: #4a4a4a;
-    border-color: #e5a323;
-}
-
-.answer.correct {
-    background: #176b35;
-    border-color: #36d46b;
-    color: white;
-}
-
-.answer.wrong {
-    background: #8a2424;
-    border-color: #ff5555;
-    color: white;
-}
-
-#feedback {
+.instructions {
     text-align: center;
-    font-weight: bold;
+    color: #bbb;
+    font-size: 13px;
+    line-height: 1.7;
     margin-top: 18px;
-    min-height: 25px;
-}
-
-#finalScore {
-    text-align: center;
-    font-size: 42px;
-    color: #ffbd36;
-    margin: 20px;
-}
-
-.result-message {
-    text-align: center;
-    color: #ddd;
-    line-height: 1.6;
 }
 
 .footer {
     text-align: center;
     color: #777;
-    font-size: 12px;
-    margin-top: 25px;
+    font-size: 11px;
+    margin-top: 20px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="game">
+<div class="container">
 
     <div class="logo">BASIT GAME</div>
-    <div class="subtitle">THE ULTIMATE QUIZ CHALLENGE</div>
+    <div class="subtitle">THE ENDLESS RUNNER</div>
 
-    <!-- HOME SCREEN -->
-    <div id="homeScreen" class="screen active">
-
-        <h2>WELCOME PLAYER!</h2>
-
-        <p class="description">
-            Welcome to BASIT GAME!<br>
-            Test your general knowledge,
-            challenge your brain and
-            become a quiz champion.
-            <br><br>
-            15 Questions | 15 Seconds Each
-        </p>
-
-        <button onclick="startGame()">START GAME</button>
-
+    <div class="scoreboard">
+        <span>SCORE: <span id="score">0</span></span>
+        <span>COINS: <span id="coins">0</span></span>
+        <span>BEST: <span id="best">0</span></span>
     </div>
 
-    <!-- GAME SCREEN -->
-    <div id="gameScreen" class="screen">
+    <canvas id="game" width="800" height="360"></canvas>
 
-        <div class="stats">
-            <span id="questionNumber">Question 1/15</span>
-            <span id="score">Score: 0</span>
-        </div>
+    <button id="startBtn" onclick="startGame()">START GAME</button>
 
-        <div class="timer-bar">
-            <div id="timerFill"></div>
-        </div>
-
-        <h3 id="question">Question appears here</h3>
-
-        <div id="answers" class="answers"></div>
-
-        <p id="feedback"></p>
-
-        <button id="nextButton" onclick="nextQuestion()" style="display:none;">
-            NEXT QUESTION
-        </button>
-
+    <div class="controls">
+        <button id="jumpBtn" onclick="jump()">⬆ JUMP</button>
+        <button onclick="restartGame()">↻ RESTART</button>
     </div>
 
-    <!-- RESULT SCREEN -->
-    <div id="resultScreen" class="screen">
-
-        <h2>GAME COMPLETED!</h2>
-
-        <div id="finalScore">0/15</div>
-
-        <p id="resultMessage" class="result-message"></p>
-
-        <button onclick="startGame()">PLAY AGAIN</button>
-
-        <button onclick="goHome()" style="background:#444;color:white;">
-            MAIN MENU
-        </button>
-
+    <div class="instructions">
+        TAP JUMP TO AVOID OBSTACLES.<br>
+        COLLECT COINS AND BEAT YOUR HIGH SCORE!<br>
+        You can also press SPACE on a keyboard.
     </div>
 
     <div class="footer">
-        © 2026 BASIT GAME | ALL RIGHTS RESERVED
+        © 2026 BASIT GAME
     </div>
 
 </div>
 
 <script>
 
-const questions = [
-    {
-        q: "What is the capital of Nigeria?",
-        a: ["Lagos", "Abuja", "Kano", "Ibadan"],
-        correct: 1
-    },
-    {
-        q: "Which planet is known as the Red Planet?",
-        a: ["Venus", "Jupiter", "Mars", "Saturn"],
-        correct: 2
-    },
-    {
-        q: "How many days are there in a leap year?",
-        a: ["365", "366", "364", "367"],
-        correct: 1
-    },
-    {
-        q: "Which animal is known as the King of the Jungle?",
-        a: ["Tiger", "Elephant", "Lion", "Leopard"],
-        correct: 2
-    },
-    {
-        q: "What is the largest ocean in the world?",
-        a: ["Atlantic", "Indian", "Arctic", "Pacific"],
-        correct: 3
-    },
-    {
-        q: "Who wrote Romeo and Juliet?",
-        a: ["Charles Dickens", "William Shakespeare", "Chinua Achebe", "Mark Twain"],
-        correct: 1
-    },
-    {
-        q: "What is the chemical symbol for water?",
-        a: ["CO2", "O2", "H2O", "NaCl"],
-        correct: 2
-    },
-    {
-        q: "Which continent is Nigeria located in?",
-        a: ["Asia", "Europe", "Africa", "Australia"],
-        correct: 2
-    },
-    {
-        q: "How many sides does a hexagon have?",
-        a: ["Five", "Six", "Seven", "Eight"],
-        correct: 1
-    },
-    {
-        q: "Which organ pumps blood around the human body?",
-        a: ["Brain", "Liver", "Heart", "Lungs"],
-        correct: 2
-    },
-    {
-        q: "What is the largest planet in our solar system?",
-        a: ["Earth", "Mars", "Jupiter", "Neptune"],
-        correct: 2
-    },
-    {
-        q: "Which language is primarily used to style web pages?",
-        a: ["HTML", "CSS", "JavaScript", "Python"],
-        correct: 1
-    },
-    {
-        q: "What is the currency of Japan?",
-        a: ["Dollar", "Yen", "Euro", "Pound"],
-        correct: 1
-    },
-    {
-        q: "How many colours are traditionally in a rainbow?",
-        a: ["Five", "Six", "Seven", "Eight"],
-        correct: 2
-    },
-    {
-        q: "Which gas do plants absorb from the atmosphere?",
-        a: ["Oxygen", "Hydrogen", "Carbon dioxide", "Nitrogen"],
-        correct: 2
-    }
-];
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-let currentQuestion = 0;
+const scoreText = document.getElementById("score");
+const coinsText = document.getElementById("coins");
+const bestText = document.getElementById("best");
+const startBtn = document.getElementById("startBtn");
+
+let gameRunning = false;
+let gameOver = false;
+
 let score = 0;
-let timeLeft = 15;
-let timer;
-let answered = false;
+let coins = 0;
+let best = 0;
 
-function showScreen(screenId) {
-    document.querySelectorAll(".screen").forEach(screen => {
-        screen.classList.remove("active");
-    });
+try {
+    best = Number(localStorage.getItem("basitBest")) || 0;
+} catch(e) {}
 
-    document.getElementById(screenId).classList.add("active");
+bestText.textContent = best;
+
+const ground = 290;
+
+const player = {
+    x: 100,
+    y: ground - 55,
+    width: 42,
+    height: 55,
+    velocity: 0,
+    jumping: false
+};
+
+let obstacles = [];
+let treasures = [];
+
+let speed = 6;
+let obstacleTimer = 0;
+let coinTimer = 0;
+let lastTime = 0;
+let animationId = null;
+
+function drawBackground() {
+
+    // Sky
+    ctx.fillStyle = "#a8d9ed";
+    ctx.fillRect(0, 0, 800, 360);
+
+    // Sun
+    ctx.fillStyle = "#ffcf53";
+    ctx.beginPath();
+    ctx.arc(690, 65, 35, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Clouds
+    ctx.fillStyle = "white";
+
+    drawCloud(130, 65);
+    drawCloud(390, 95);
+    drawCloud(590, 130);
+
+    // Distant hills
+    ctx.fillStyle = "#78a66c";
+
+    ctx.beginPath();
+    ctx.moveTo(0, 255);
+    ctx.quadraticCurveTo(200, 130, 400, 255);
+    ctx.quadraticCurveTo(600, 150, 800, 250);
+    ctx.lineTo(800, 360);
+    ctx.lineTo(0, 360);
+    ctx.fill();
+
+    // Ground
+    ctx.fillStyle = "#d5a35d";
+    ctx.fillRect(0, ground, 800, 70);
+
+    ctx.fillStyle = "#5d963f";
+    ctx.fillRect(0, ground, 800, 9);
+
+    // Ground markings
+    ctx.fillStyle = "#9b6a32";
+
+    for (let i = 0; i < 800; i += 70) {
+        ctx.fillRect(i, 320, 30, 5);
+    }
+}
+
+function drawCloud(x, y) {
+
+    ctx.beginPath();
+    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.arc(x + 20, y - 10, 23, 0, Math.PI * 2);
+    ctx.arc(x + 43, y, 18, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawPlayer() {
+
+    const x = player.x;
+    const y = player.y;
+
+    // Body
+    ctx.fillStyle = "#e5a323";
+    ctx.fillRect(x, y + 15, 42, 40);
+
+    // Head
+    ctx.fillStyle = "#f5bd80";
+    ctx.fillRect(x + 5, y, 32, 27);
+
+    // Hair
+    ctx.fillStyle = "#252525";
+    ctx.fillRect(x + 4, y, 34, 8);
+
+    // Eye
+    ctx.fillStyle = "#222";
+    ctx.fillRect(x + 28, y + 10, 5, 5);
+
+    // Legs
+    ctx.fillStyle = "#263b65";
+
+    if (!player.jumping && gameRunning) {
+        let step = Math.floor(Date.now() / 100) % 2;
+
+        if (step === 0) {
+            ctx.fillRect(x + 5, y + 52, 12, 12);
+            ctx.fillRect(x + 27, y + 48, 12, 16);
+        } else {
+            ctx.fillRect(x + 5, y + 48, 12, 16);
+            ctx.fillRect(x + 27, y + 52, 12, 12);
+        }
+    } else {
+        ctx.fillRect(x + 5, y + 52, 12, 12);
+        ctx.fillRect(x + 27, y + 52, 12, 12);
+    }
+}
+
+function drawObstacle(ob) {
+
+    ctx.fillStyle = "#287b38";
+
+    ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+
+    ctx.fillRect(ob.x - 9, ob.y + 13, 10, 12);
+    ctx.fillRect(ob.x + ob.width - 1, ob.y + 25, 10, 12);
+
+    ctx.fillStyle = "#165326";
+    ctx.fillRect(ob.x + 8, ob.y + 5, 5, 8);
+}
+
+function drawCoin(coin) {
+
+    ctx.fillStyle = "#ffbd36";
+
+    ctx.beginPath();
+    ctx.arc(coin.x, coin.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#b77916";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#fff3ae";
+    ctx.font = "bold 14px Arial";
+    ctx.fillText("$", coin.x - 4, coin.y + 5);
+}
+
+function jump() {
+
+    if (!gameRunning || gameOver) return;
+
+    if (!player.jumping) {
+
+        player.velocity = -14;
+        player.jumping = true;
+    }
 }
 
 function startGame() {
-    currentQuestion = 0;
-    score = 0;
 
-    showScreen("gameScreen");
-    loadQuestion();
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+
+    score = 0;
+    coins = 0;
+    speed = 6;
+
+    obstacles = [];
+    treasures = [];
+
+    player.y = ground - player.height;
+    player.velocity = 0;
+    player.jumping = false;
+
+    obstacleTimer = 0;
+    coinTimer = 0;
+
+    gameOver = false;
+    gameRunning = true;
+
+    scoreText.textContent = 0;
+    coinsText.textContent = 0;
+
+    startBtn.textContent = "GAME RUNNING...";
+
+    lastTime = 0;
+    animationId = requestAnimationFrame(gameLoop);
 }
 
-function loadQuestion() {
+function restartGame() {
+    startGame();
+}
 
-    clearInterval(timer);
+function createObstacle() {
 
-    answered = false;
-    timeLeft = 15;
+    obstacles.push({
+        x: 820,
+        y: ground - 45,
+        width: 32,
+        height: 45
+    });
+}
 
-    const q = questions[currentQuestion];
+function createCoin() {
 
-    document.getElementById("questionNumber").textContent =
-        "Question " + (currentQuestion + 1) + "/" + questions.length;
+    treasures.push({
+        x: 820,
+        y: ground - 85 - Math.random() * 35,
+        radius: 12
+    });
+}
 
-    document.getElementById("score").textContent =
-        "Score: " + score;
+function update(delta) {
 
-    document.getElementById("question").textContent = q.q;
+    const dt = delta / 16.67;
 
-    document.getElementById("feedback").textContent = "";
+    score += dt * 0.1;
 
-    document.getElementById("nextButton").style.display = "none";
+    speed = Math.min(13, 6 + score / 120);
 
-    document.getElementById("timerFill").style.width = "100%";
+    // Player gravity
+    player.y += player.velocity * dt;
+    player.velocity += 0.7 * dt;
 
-    const answers = document.getElementById("answers");
+    if (player.y >= ground - player.height) {
 
-    answers.innerHTML = "";
+        player.y = ground - player.height;
+        player.velocity = 0;
+        player.jumping = false;
+    }
 
-    q.a.forEach((answer, index) => {
+    // Spawn obstacles
+    obstacleTimer += delta;
 
-        const button = document.createElement("button");
+    if (obstacleTimer > Math.max(750, 1500 - speed * 45)) {
+        createObstacle();
+        obstacleTimer = 0;
+    }
 
-        button.className = "answer";
-        button.textContent = answer;
+    // Spawn coins
+    coinTimer += delta;
 
-        button.onclick = () => checkAnswer(index);
+    if (coinTimer > 1400) {
+        createCoin();
+        coinTimer = 0;
+    }
 
-        answers.appendChild(button);
-
+    // Move obstacles
+    obstacles.forEach(ob => {
+        ob.x -= speed * dt;
     });
 
-    timer = setInterval(() => {
+    obstacles = obstacles.filter(ob => ob.x > -60);
 
-        timeLeft--;
+    // Move coins
+    treasures.forEach(coin => {
+        coin.x -= speed * dt;
+    });
 
-        document.getElementById("timerFill").style.width =
-            (timeLeft / 15 * 100) + "%";
+    treasures = treasures.filter(coin => coin.x > -30);
 
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            timeUp();
+    // Obstacle collision
+    obstacles.forEach(ob => {
+
+        if (
+            player.x + player.width - 8 > ob.x &&
+            player.x + 8 < ob.x + ob.width &&
+            player.y + player.height - 5 > ob.y
+        ) {
+            endGame();
+        }
+    });
+
+    // Coin collection
+    treasures = treasures.filter(coin => {
+
+        let dx = player.x + 21 - coin.x;
+        let dy = player.y + 25 - coin.y;
+
+        if (Math.sqrt(dx * dx + dy * dy) < 30) {
+
+            coins++;
+            return false;
         }
 
-    }, 1000);
-}
-
-function checkAnswer(selected) {
-
-    if (answered) return;
-
-    answered = true;
-
-    clearInterval(timer);
-
-    const q = questions[currentQuestion];
-
-    const buttons = document.querySelectorAll(".answer");
-
-    buttons.forEach(button => {
-        button.disabled = true;
+        return true;
     });
 
-    if (selected === q.correct) {
-
-        score++;
-
-        buttons[selected].classList.add("correct");
-
-        document.getElementById("feedback").textContent =
-            "CORRECT! WELL DONE!";
-
-        document.getElementById("feedback").style.color =
-            "#36d46b";
-
-    } else {
-
-        buttons[selected].classList.add("wrong");
-
-        buttons[q.correct].classList.add("correct");
-
-        document.getElementById("feedback").textContent =
-            "WRONG! The correct answer is " + q.a[q.correct];
-
-        document.getElementById("feedback").style.color =
-            "#ff7777";
-    }
-
-    document.getElementById("score").textContent =
-        "Score: " + score;
-
-    document.getElementById("nextButton").style.display = "block";
+    scoreText.textContent = Math.floor(score);
+    coinsText.textContent = coins;
 }
 
-function timeUp() {
+function draw() {
 
-    if (answered) return;
+    drawBackground();
 
-    answered = true;
+    treasures.forEach(drawCoin);
+    obstacles.forEach(drawObstacle);
 
-    const q = questions[currentQuestion];
+    drawPlayer();
 
-    const buttons = document.querySelectorAll(".answer");
+    if (!gameRunning && !gameOver) {
 
-    buttons.forEach(button => {
-        button.disabled = true;
-    });
+        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.fillRect(0, 0, 800, 360);
 
-    buttons[q.correct].classList.add("correct");
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.font = "bold 38px Arial";
+        ctx.fillText("BASIT GAME", 400, 155);
 
-    document.getElementById("feedback").textContent =
-        "TIME UP! Correct answer: " + q.a[q.correct];
-
-    document.getElementById("feedback").style.color =
-        "#ff7777";
-
-    document.getElementById("nextButton").style.display = "block";
-}
-
-function nextQuestion() {
-
-    clearInterval(timer);
-
-    currentQuestion++;
-
-    if (currentQuestion < questions.length) {
-
-        loadQuestion();
-
-    } else {
-
-        showResults();
-
+        ctx.font = "20px Arial";
+        ctx.fillText("Press START GAME to play", 400, 200);
+        ctx.textAlign = "left";
     }
 }
 
-function showResults() {
+function gameLoop(timestamp) {
 
-    clearInterval(timer);
+    if (!gameRunning) return;
 
-    showScreen("resultScreen");
+    let delta = lastTime ? Math.min(timestamp - lastTime, 40) : 16.67;
+    lastTime = timestamp;
 
-    document.getElementById("finalScore").textContent =
-        score + "/" + questions.length;
+    update(delta);
+    draw();
 
-    let message;
+    if (gameRunning) {
+        animationId = requestAnimationFrame(gameLoop);
+    }
+}
 
-    if (score >= 13) {
-        message = "EXCELLENT! YOU ARE A QUIZ CHAMPION!";
-    } else if (score >= 10) {
-        message = "GREAT JOB! YOU HAVE GOOD KNOWLEDGE!";
-    } else if (score >= 7) {
-        message = "GOOD TRY! KEEP LEARNING!";
-    } else {
-        message = "KEEP PRACTISING! YOU CAN DO BETTER!";
+function endGame() {
+
+    gameRunning = false;
+    gameOver = true;
+
+    let finalScore = Math.floor(score);
+
+    if (finalScore > best) {
+
+        best = finalScore;
+
+        try {
+            localStorage.setItem("basitBest", best);
+        } catch(e) {}
     }
 
-    document.getElementById("resultMessage").textContent =
-        message;
+    bestText.textContent = best;
+
+    draw();
+
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.fillRect(0, 0, 800, 360);
+
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "#ffbd36";
+    ctx.font = "bold 45px Arial";
+    ctx.fillText("GAME OVER!", 400, 140);
+
+    ctx.fillStyle = "white";
+    ctx.font = "25px Arial";
+    ctx.fillText("Score: " + finalScore, 400, 195);
+
+    ctx.font = "20px Arial";
+    ctx.fillText("Coins collected: " + coins, 400, 235);
+
+    ctx.font = "17px Arial";
+    ctx.fillText("Press RESTART to play again", 400, 280);
+
+    ctx.textAlign = "left";
+
+    startBtn.textContent = "PLAY AGAIN";
 }
 
-function goHome() {
+// Keyboard controls
+document.addEventListener("keydown", function(event) {
 
-    clearInterval(timer);
+    if (event.code === "Space" || event.code === "ArrowUp") {
 
-    showScreen("homeScreen");
-}
+        event.preventDefault();
+        jump();
+    }
+});
+
+// Touch controls
+canvas.addEventListener("pointerdown", function() {
+    jump();
+});
+
+// Initial screen
+draw();
 
 </script>
 
 </body>
-  </html>
-  
+</html>
